@@ -32,27 +32,27 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void register_successTest() {
+    public void registerSuccessTest() {
         assertEquals(0L, userRepository.count());
         authService.register(registerRequest);
         assertEquals(1L, userRepository.count());
     }
 
     @Test
-    public void registerTwiceWithSameEmail_throwsExceptionTest() {
+    public void registerTwiceWithSameEmailThrowsExceptionTest() {
         authService.register(registerRequest);
         assertThrows(DuplicateUserException.class, () -> authService.register(registerRequest));
         assertEquals(1L, userRepository.count());
     }
 
     @Test
-    public void register_userHasCorrectRole_Test() {
+    public void registerUserHasCorrectRoleTest() {
         authService.register(registerRequest);
-        assertEquals(Role.VOTER, userRepository.findByEmail("john@gmail.com").get().getRole());
+        assertEquals(Role.VOTER, userRepository.findByEmail("silasosunba@gmail.com").get().getRole());
     }
 
     @Test
-    public void login_success_Test() {
+    public void loginSuccessTest() {
         authService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("silasosunba@gmail.com");
@@ -61,7 +61,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void loginUnregisteredUser_throwsExceptionTest() {
+    public void loginUnregisteredUserThrowsExceptionTest() {
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("ghost@gmail.com");
         loginRequest.setPassword("password123");
@@ -69,7 +69,7 @@ public class AuthServiceImplTest {
     }
 
     @Test
-    public void loginWithWrongPassword_throwsExceptionTest() {
+    public void loginWithWrongPasswordThrowsExceptionTest() {
         authService.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("silasosunba@gmail.com");

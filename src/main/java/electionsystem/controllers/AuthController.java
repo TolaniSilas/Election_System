@@ -1,18 +1,23 @@
-package dreamdev.electionsystem.controllers;
-import dreamdev.electionsystem.dtos.requests.LoginRequest;
-import dreamdev.electionsystem.dtos.requests.RegisterRequest;
-import dreamdev.electionsystem.dtos.responses.ApiResponse;
-import dreamdev.electionsystem.services.AuthService;
-import lombok.RequiredArgsConstructor;
+package electionsystem.controllers;
+
+import electionsystem.dtos.requests.LoginRequest;
+import electionsystem.dtos.requests.RegisterRequest;
+import electionsystem.dtos.responses.ApiResponse;
+import electionsystem.services.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
+
+    @Autowired
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request) {
