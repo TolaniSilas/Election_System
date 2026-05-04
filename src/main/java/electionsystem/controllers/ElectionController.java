@@ -1,9 +1,12 @@
 package electionsystem.controllers;
 
+import electionsystem.data.models.User;
 import electionsystem.dtos.requests.ElectionRequest;
 import electionsystem.dtos.responses.ApiResponse;
+import electionsystem.security.CurrentUser;
 import electionsystem.services.ElectionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,24 +16,27 @@ public class ElectionController {
 
     private final ElectionService electionService;
 
-    @Autowired
     public ElectionController(ElectionService electionService) {
         this.electionService = electionService;
     }
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<ApiResponse> create(@PathVariable String userId, @RequestBody ElectionRequest request) {
-        return ResponseEntity.ok(new ApiResponse(true, "Election created", electionService.createElection(userId, request)));
+    @PostMapping
+    public ResponseEntity<ApiResponse> create(@CurrentUser User currentUser, @Valid @RequestBody ElectionRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse(true, "Election created", electionService.createElection(currentUser, request)));
     }
 
-    @PutMapping("/{userId}/{electionId}")
-    public ResponseEntity<ApiResponse> update(@PathVariable String userId, @PathVariable String electionId, @RequestBody ElectionRequest request) {
-        return ResponseEntity.ok(new ApiResponse(true, "Election updated", electionService.updateElection(userId, electionId, request)));
+    @PutMapping("/{electionId}")
+    public ResponseEntity<ApiResponse> update(@CurrentUser User currentUser,
+                                              @PathVariable String electionId,
+                                              @Valid @RequestBody ElectionRequest request) {
+        return ResponseEntity.ok(new ApiResponse(true, "Election updated",
+                electionService.updateElection(currentUser, electionId, request)));
     }
 
-    @DeleteMapping("/{userId}/{electionId}")
-    public ResponseEntity<ApiResponse> delete(@PathVariable String userId, @PathVariable String electionId) {
-        electionService.deleteElection(userId, electionId);
+    @DeleteMapping("/{electionId}")
+    public ResponseEntity<ApiResponse> delete(@CurrentUser User currentUser, @PathVariable String electionId) {
+        electionService.deleteElection(currentUser, electionId);
         return ResponseEntity.ok(new ApiResponse(true, "Election deleted", null));
     }
 

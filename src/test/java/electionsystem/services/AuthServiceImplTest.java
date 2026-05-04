@@ -1,16 +1,21 @@
 package electionsystem.services;
+
+import electionsystem.data.models.ApprovalStatus;
 import electionsystem.data.models.Role;
+import electionsystem.data.models.User;
+import electionsystem.data.repositories.AuthSessionRepository;
 import electionsystem.data.repositories.UserRepository;
 import electionsystem.dtos.requests.LoginRequest;
 import electionsystem.dtos.requests.RegisterRequest;
 import electionsystem.exceptions.DuplicateUserException;
 import electionsystem.exceptions.InvalidLoginException;
+import electionsystem.exceptions.InvalidStateException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import static org.junit.jupiter.api.Assertions.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class AuthServiceImplTest {
@@ -19,45 +24,79 @@ public class AuthServiceImplTest {
     private AuthService authService;
     @Autowired
     private UserRepository userRepository;
-    private RegisterRequest registerRequest;
+    @Autowired
+    private AuthSessionRepository authSessionRepository;
+
+    private RegisterRequest voterRequest;
 
     @BeforeEach
     public void setUp() {
+        authSessionRepository.deleteAll();
         userRepository.deleteAll();
-        registerRequest = new RegisterRequest();
-        registerRequest.setUsername("john");
-        registerRequest.setEmail("silasosunba@gmail.com");
-        registerRequest.setPassword("mypassword123");
-        registerRequest.setRole("VOTER");
+        voterRequest = new RegisterRequest();
+        voterRequest.setUsername("john");
+        voterRequest.setEmail("silasosunba@gmail.com");
+        voterRequest.setPassword("mypassword123");
+        voterRequest.setRole("VOTER");
     }
 
     @Test
     public void registerSuccessTest() {
         assertEquals(0L, userRepository.count());
-        authService.register(registerRequest);
+        authService.register(voterRequest);
         assertEquals(1L, userRepository.count());
     }
 
     @Test
     public void registerTwiceWithSameEmailThrowsExceptionTest() {
-        authService.register(registerRequest);
-        assertThrows(DuplicateUserException.class, () -> authService.register(registerRequest));
+        authService.register(voterRequest);
+        assertThrows(DuplicateUserException.class, () -> authService.register(voterRequest));
         assertEquals(1L, userRepository.count());
     }
 
     @Test
     public void registerUserHasCorrectRoleTest() {
-        authService.register(registerRequest);
-        assertEquals(Role.VOTER, userRepository.findByEmail("silasosunba@gmail.com").get().getRole());
+        authService.register(voterRequest);
+        assertEquals(Role.VOTER, userRepository.findByEmail("silasosunba@gmail.com").orElseThrow().getRole());
+    }
+
+    @Test
+    public void adminRegistrationStartsPendingTest() {
+        RegisterRequest adminRequest = new RegisterRequest();
+        adminRequest.setUsername("admin-user");
+        adminRequest.setEmail("admin@gmail.com");
+        adminRequest.setPassword("mypassword123");
+        adminRequest.setRole("ADMIN");
+
+        authService.register(adminRequest);
+
+        User saved = userRepository.findByEmail("admin@gmail.com").orElseThrow();
+        assertEquals(ApprovalStatus.PENDING, saved.getApprovalStatus());
     }
 
     @Test
     public void loginSuccessTest() {
-        authService.register(registerRequest);
+        authService.register(voterRequest);
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("silasosunba@gmail.com");
         loginRequest.setPassword("mypassword123");
-        assertNotNull(authService.login(loginRequest));
+        assertNotNull(authService.login(loginRequest).getToken());
+    }
+
+    @Test
+    public void loginPendingAdminThrowsExceptionTest() {
+        RegisterRequest adminRequest = new RegisterRequest();
+        adminRequest.setUsername("pending-admin");
+        adminRequest.setEmail("pending@gmail.com");
+        adminRequest.setPassword("mypassword123");
+        adminRequest.setRole("ADMIN");
+        authService.register(adminRequest);
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("pending@gmail.com");
+        loginRequest.setPassword("mypassword123");
+
+        assertThrows(InvalidStateException.class, () -> authService.login(loginRequest));
     }
 
     @Test
@@ -70,7 +109,7 @@ public class AuthServiceImplTest {
 
     @Test
     public void loginWithWrongPasswordThrowsExceptionTest() {
-        authService.register(registerRequest);
+        authService.register(voterRequest);
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("silasosunba@gmail.com");
         loginRequest.setPassword("wrongpassword123");

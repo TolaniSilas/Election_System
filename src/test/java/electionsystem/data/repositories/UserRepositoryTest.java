@@ -1,13 +1,17 @@
 package electionsystem.data.repositories;
+
+import electionsystem.data.models.ApprovalStatus;
 import electionsystem.data.models.Role;
 import electionsystem.data.models.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.util.Optional;
-import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class UserRepositoryTest {
@@ -27,23 +31,13 @@ public class UserRepositoryTest {
 
     @Test
     public void saveUserCountIsOneTest() {
-        User user = new User();
-        user.setUsername("silas");
-        user.setEmail("silasosunba@gmail.com");
-        user.setPassword("password123");
-        user.setRole(Role.VOTER);
-        userRepository.save(user);
+        userRepository.save(buildUser("silas", "silasosunba@gmail.com"));
         assertEquals(1L, userRepository.count());
     }
 
     @Test
     public void saveUserFindByEmailReturnsSavedUserTest() {
-        User user = new User();
-        user.setUsername("silas");
-        user.setEmail("silasosunba@gmail.com");
-        user.setPassword("password123");
-        user.setRole(Role.VOTER);
-        userRepository.save(user);
+        userRepository.save(buildUser("silas", "silasosunba@gmail.com"));
 
         Optional<User> found = userRepository.findByEmail("silasosunba@gmail.com");
         assertTrue(found.isPresent());
@@ -52,13 +46,7 @@ public class UserRepositoryTest {
 
     @Test
     public void existsByEmailReturnsTrueForExistingEmailTest() {
-        User user = new User();
-        user.setUsername("silas");
-        user.setEmail("silasosunba@gmail.com");
-        user.setPassword("password123");
-        user.setRole(Role.VOTER);
-        userRepository.save(user);
-
+        userRepository.save(buildUser("silas", "silasosunba@gmail.com"));
         assertTrue(userRepository.existsByEmail("silasosunba@gmail.com"));
     }
 
@@ -69,16 +57,24 @@ public class UserRepositoryTest {
 
     @Test
     public void deleteUserCountIsZeroTest() {
-        User user = new User();
-        user.setUsername("silas");
-        user.setEmail("silasosunba@gmail.com");
-        user.setPassword("password123");
-        user.setRole(Role.VOTER);
-        User saved = userRepository.save(user);
-
+        User saved = userRepository.save(buildUser("silas", "silasosunba@gmail.com"));
         assertEquals(1L, userRepository.count());
+
         userRepository.deleteById(saved.getId());
 
         assertEquals(0L, userRepository.count());
+    }
+
+    private User buildUser(String username, String email) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPasswordHash("hashed-password");
+        user.setRole(Role.VOTER);
+        user.setApprovalStatus(ApprovalStatus.APPROVED);
+        user.setActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        user.setApprovedAt(LocalDateTime.now());
+        return user;
     }
 }

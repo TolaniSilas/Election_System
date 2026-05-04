@@ -1,0 +1,45 @@
+:root {
+  --bg: #07131d;
+  --panel: #102030;
+  --text: #f2ede5;
+  --muted: #bcb5aa;
+  --accent: #ffb36d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #0b1623;
+  color: var(--text);
+  font-family: "Segoe UI Variable", "Avenir Next", "Trebuchet MS", "Gill Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-weight: 700;
+}
+
+p {
+  line-height: 1.6;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+}

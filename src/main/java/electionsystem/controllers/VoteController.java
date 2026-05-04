@@ -1,9 +1,11 @@
 package electionsystem.controllers;
 
+import electionsystem.data.models.User;
 import electionsystem.dtos.requests.VoteRequest;
 import electionsystem.dtos.responses.ApiResponse;
+import electionsystem.security.CurrentUser;
 import electionsystem.services.VoteService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,14 +15,13 @@ public class VoteController {
 
     private final VoteService voteService;
 
-    @Autowired
     public VoteController(VoteService voteService) {
         this.voteService = voteService;
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> castVote(@RequestBody VoteRequest request) {
-        voteService.castVote(request);
+    public ResponseEntity<ApiResponse> castVote(@CurrentUser User currentUser, @Valid @RequestBody VoteRequest request) {
+        voteService.castVote(currentUser, request);
         return ResponseEntity.ok(new ApiResponse(true, "Vote cast successfully", null));
     }
 

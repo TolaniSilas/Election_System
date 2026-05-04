@@ -2,6 +2,7 @@ package electionsystem.data.models;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 
 @Document(collection = "elections")
@@ -13,6 +14,9 @@ public class Election {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ElectionStatus status;
+    private String createdByUserId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -26,4 +30,10 @@ public class Election {
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
     public ElectionStatus getStatus() { return status; }
     public void setStatus(ElectionStatus status) { this.status = status; }
+    public String getCreatedByUserId() { return createdByUserId; }
+    public void setCreatedByUserId(String createdByUserId) { this.createdByUserId = createdByUserId; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

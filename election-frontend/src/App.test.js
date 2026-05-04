@@ -1,0 +1,7 @@
+import { render, screen } from "@testing-library/react";
+import App from "./App";
+
+test("renders election operations heading", () => {
+  render(<App />);
+  expect(screen.getByText(/Election Operations Suite/i)).toBeInTheDocument();
+});

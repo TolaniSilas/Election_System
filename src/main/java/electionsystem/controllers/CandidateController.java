@@ -1,9 +1,12 @@
 package electionsystem.controllers;
 
+import electionsystem.data.models.User;
 import electionsystem.dtos.requests.CandidateRequest;
 import electionsystem.dtos.responses.ApiResponse;
+import electionsystem.security.CurrentUser;
 import electionsystem.services.CandidateService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,19 +16,19 @@ public class CandidateController {
 
     private final CandidateService candidateService;
 
-    @Autowired
     public CandidateController(CandidateService candidateService) {
         this.candidateService = candidateService;
     }
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<ApiResponse> add(@PathVariable String userId, @RequestBody CandidateRequest request) {
-        return ResponseEntity.ok(new ApiResponse(true, "Candidate added", candidateService.addCandidate(userId, request)));
+    @PostMapping
+    public ResponseEntity<ApiResponse> add(@CurrentUser User currentUser, @Valid @RequestBody CandidateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse(true, "Candidate added", candidateService.addCandidate(currentUser, request)));
     }
 
-    @DeleteMapping("/{userId}/{candidateId}")
-    public ResponseEntity<ApiResponse> remove(@PathVariable String userId, @PathVariable String candidateId) {
-        candidateService.removeCandidate(userId, candidateId);
+    @DeleteMapping("/{candidateId}")
+    public ResponseEntity<ApiResponse> remove(@CurrentUser User currentUser, @PathVariable String candidateId) {
+        candidateService.removeCandidate(currentUser, candidateId);
         return ResponseEntity.ok(new ApiResponse(true, "Candidate removed", null));
     }
 
