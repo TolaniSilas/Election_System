@@ -137,12 +137,24 @@ function App() {
     setErrorMessage("");
     setStatusMessage("");
     try {
-      const response = await api.register(registerForm);
-      const pendingCopy =
-        registerForm.role === "ADMIN"
-          ? "Registration sent. A super admin must approve this admin account before login."
-          : response.message;
-      setStatusMessage(pendingCopy);
+      const submittedForm = { ...registerForm };
+      await api.register(submittedForm);
+
+      if (submittedForm.role === "VOTER") {
+        const loginResponse = await api.login({
+          email: submittedForm.email,
+          password: submittedForm.password,
+        });
+        const nextToken = loginResponse.data.token;
+        localStorage.setItem(TOKEN_KEY, nextToken);
+        setToken(nextToken);
+        setStatusMessage("Registration successful. You are now signed in and ready to vote.");
+      } else {
+        setStatusMessage(
+          "Registration sent. A super admin must approve this admin account before login."
+        );
+      }
+
       setRegisterForm({
         username: "",
         email: "",
