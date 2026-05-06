@@ -92,7 +92,7 @@ public class ElectionSeedConfig {
                 candidate.setElectionId(election.getId());
                 candidate.setParty("INDEPENDENT");
                 candidate.setBiography(candidateName + " is a seeded candidate profile. Admins can update election rosters with richer biographies.");
-                candidate.setImageUrl("https://via.placeholder.com/480x320.png?text=" + candidateName.replace(" ", "+"));
+                candidate.setImageUrl("https://picture.jpg" + candidateName.replace(" ", "+"));
                 candidateRepository.save(candidate);
             }
         }
