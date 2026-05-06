@@ -29,4 +29,9 @@ public class VoteController {
     public ResponseEntity<ApiResponse> getResults(@PathVariable String electionId) {
         return ResponseEntity.ok(new ApiResponse(true, "Results fetched", voteService.getResults(electionId)));
     }
+
+    @GetMapping("/participation")
+    public ResponseEntity<ApiResponse> getParticipation(@CurrentUser User currentUser) {
+        return ResponseEntity.ok(new ApiResponse(true, "Participation fetched", voteService.getParticipationSummary(currentUser)));
+    }
 }

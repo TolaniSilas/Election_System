@@ -41,12 +41,12 @@ public class ElectionController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAll() {
-        return ResponseEntity.ok(new ApiResponse(true, "Elections fetched", electionService.getAllElections()));
+    public ResponseEntity<ApiResponse> getAll(@CurrentUser User currentUser) {
+        return ResponseEntity.ok(new ApiResponse(true, "Elections fetched", electionService.getAllElections(currentUser)));
     }
 
     @GetMapping("/{electionId}")
-    public ResponseEntity<ApiResponse> getById(@PathVariable String electionId) {
-        return ResponseEntity.ok(new ApiResponse(true, "Election fetched", electionService.getElectionById(electionId)));
+    public ResponseEntity<ApiResponse> getById(@PathVariable String electionId, @CurrentUser User currentUser) {
+        return ResponseEntity.ok(new ApiResponse(true, "Election fetched", electionService.getElectionById(electionId, currentUser)));
     }
 }

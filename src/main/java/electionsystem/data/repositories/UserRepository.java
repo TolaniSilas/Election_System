@@ -8,6 +8,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
+    boolean existsByNin(String nin);
     Optional<User> findByUsername(String username);
     long countByRole(electionsystem.data.models.Role role);
 }

@@ -10,6 +10,6 @@ public interface ElectionService {
     Election createElection(User currentUser, ElectionRequest request);
     Election updateElection(User currentUser, String electionId, ElectionRequest request);
     void deleteElection(User currentUser, String electionId);
-    List<Election> getAllElections();
-    Election getElectionById(String electionId);
+    List<Election> getAllElections(User currentUser);
+    Election getElectionById(String electionId, User currentUser);
 }

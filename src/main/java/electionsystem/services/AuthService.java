@@ -15,5 +15,7 @@ public interface AuthService {
     UserResponse getCurrentUser(User currentUser);
     List<UserResponse> getAllUsers(User currentUser);
     UserResponse approveAdmin(String userId, User currentUser);
+    UserResponse approveVoter(String userId, User currentUser);
+    void rejectVoter(String userId, User currentUser);
     void deleteUser(String userId, User currentUser);
 }

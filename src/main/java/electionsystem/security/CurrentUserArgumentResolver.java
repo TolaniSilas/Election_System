@@ -12,15 +12,17 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
+        
         return parameter.hasParameterAnnotation(CurrentUser.class) &&
-                User.class.isAssignableFrom(parameter.getParameterType());
+            User.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override
     public Object resolveArgument(MethodParameter parameter,
-                                  ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest,
-                                  WebDataBinderFactory binderFactory) {
-        return webRequest.getAttribute(AuthContext.CURRENT_USER, NativeWebRequest.SCOPE_REQUEST);
+        ModelAndViewContainer mavContainer,
+        NativeWebRequest webRequest,
+        WebDataBinderFactory binderFactory) {
+            
+            return webRequest.getAttribute(AuthContext.CURRENT_USER, NativeWebRequest.SCOPE_REQUEST);
     }
 }

@@ -1,14 +1,11 @@
 package electionsystem.dtos.responses;
 
-import java.util.Map;
-
-public class ElectionResultResponse {
+public class ElectionParticipationResponse {
     private String electionId;
     private String electionTitle;
     private String category;
     private String state;
-    private long totalVotes;
-    private Map<String, Long> votesPerCandidate;
+    private long participantCount;
 
     public String getElectionId() { return electionId; }
     public void setElectionId(String electionId) { this.electionId = electionId; }
@@ -18,8 +15,6 @@ public class ElectionResultResponse {
     public void setCategory(String category) { this.category = category; }
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
-    public long getTotalVotes() { return totalVotes; }
-    public void setTotalVotes(long totalVotes) { this.totalVotes = totalVotes; }
-    public Map<String, Long> getVotesPerCandidate() { return votesPerCandidate; }
-    public void setVotesPerCandidate(Map<String, Long> votesPerCandidate) { this.votesPerCandidate = votesPerCandidate; }
+    public long getParticipantCount() { return participantCount; }
+    public void setParticipantCount(long participantCount) { this.participantCount = participantCount; }
 }

@@ -3,6 +3,7 @@ package electionsystem.dtos.responses;
 import electionsystem.data.models.ApprovalStatus;
 import electionsystem.data.models.Role;
 import electionsystem.data.models.User;
+import electionsystem.data.models.VoterApprovalStatus;
 
 import java.time.LocalDateTime;
 
@@ -10,8 +11,11 @@ public class UserResponse {
     private String id;
     private String username;
     private String email;
+    private String nin;
+    private String stateOfOrigin;
     private Role role;
     private ApprovalStatus approvalStatus;
+    private VoterApprovalStatus voterApprovalStatus;
     private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt;
@@ -21,8 +25,11 @@ public class UserResponse {
         response.setId(user.getId());
         response.setUsername(user.getUsername());
         response.setEmail(user.getEmail());
+        response.setNin(user.getNin());
+        response.setStateOfOrigin(user.getStateOfOrigin());
         response.setRole(user.getRole());
         response.setApprovalStatus(user.getApprovalStatus());
+        response.setVoterApprovalStatus(user.getVoterApprovalStatus());
         response.setActive(user.isActive());
         response.setCreatedAt(user.getCreatedAt());
         response.setApprovedAt(user.getApprovedAt());
@@ -35,10 +42,16 @@ public class UserResponse {
     public void setUsername(String username) { this.username = username; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    public String getNin() { return nin; }
+    public void setNin(String nin) { this.nin = nin; }
+    public String getStateOfOrigin() { return stateOfOrigin; }
+    public void setStateOfOrigin(String stateOfOrigin) { this.stateOfOrigin = stateOfOrigin; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
     public ApprovalStatus getApprovalStatus() { return approvalStatus; }
     public void setApprovalStatus(ApprovalStatus approvalStatus) { this.approvalStatus = approvalStatus; }
+    public VoterApprovalStatus getVoterApprovalStatus() { return voterApprovalStatus; }
+    public void setVoterApprovalStatus(VoterApprovalStatus voterApprovalStatus) { this.voterApprovalStatus = voterApprovalStatus; }
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
     public LocalDateTime getCreatedAt() { return createdAt; }

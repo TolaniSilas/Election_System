@@ -14,6 +14,9 @@ public class Election {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ElectionStatus status;
+    private ElectionCategory category;
+    private ElectionScope scope;
+    private String state;
     private String createdByUserId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -30,6 +33,12 @@ public class Election {
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
     public ElectionStatus getStatus() { return status; }
     public void setStatus(ElectionStatus status) { this.status = status; }
+    public ElectionCategory getCategory() { return category; }
+    public void setCategory(ElectionCategory category) { this.category = category; }
+    public ElectionScope getScope() { return scope; }
+    public void setScope(ElectionScope scope) { this.scope = scope; }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
     public String getCreatedByUserId() { return createdByUserId; }
     public void setCreatedByUserId(String createdByUserId) { this.createdByUserId = createdByUserId; }
     public LocalDateTime getCreatedAt() { return createdAt; }

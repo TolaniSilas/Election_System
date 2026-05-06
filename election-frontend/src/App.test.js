@@ -3,5 +3,5 @@ import App from "./App";
 
 test("renders election operations heading", () => {
   render(<App />);
-  expect(screen.getByText(/Election Operations Suite/i)).toBeInTheDocument();
+  expect(screen.getByText(/Election System/i)).toBeInTheDocument();
 });

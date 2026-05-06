@@ -1,6 +1,7 @@
 package electionsystem.dtos.requests;
 
-import jakarta.validation.constraints.Future;
+import electionsystem.data.models.ElectionCategory;
+import electionsystem.data.models.ElectionScope;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,6 +23,15 @@ public class ElectionRequest {
     @NotNull(message = "End time is required")
     private LocalDateTime endTime;
 
+    @NotNull(message = "Election category is required")
+    private ElectionCategory category;
+
+    @NotNull(message = "Election scope is required")
+    private ElectionScope scope;
+
+    @Size(max = 50, message = "State must be at most 50 characters")
+    private String state;
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }
@@ -30,4 +40,10 @@ public class ElectionRequest {
     public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
     public LocalDateTime getEndTime() { return endTime; }
     public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public ElectionCategory getCategory() { return category; }
+    public void setCategory(ElectionCategory category) { this.category = category; }
+    public ElectionScope getScope() { return scope; }
+    public void setScope(ElectionScope scope) { this.scope = scope; }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
 }

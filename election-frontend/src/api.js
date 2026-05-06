@@ -3,8 +3,9 @@ const API_BASE_URL =
 
 async function request(path, { method = "GET", token, body } = {}) {
   const headers = {};
+  const isFormData = body instanceof FormData;
 
-  if (body) {
+  if (body && !isFormData) {
     headers["Content-Type"] = "application/json";
   }
 
@@ -15,7 +16,7 @@ async function request(path, { method = "GET", token, body } = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
   });
 
   const text = await response.text();
@@ -43,6 +44,16 @@ export const api = {
       method: "POST",
       token,
     }),
+  approveVoter: (token, userId) =>
+    request(`/api/auth/users/${userId}/approve-voter`, {
+      method: "POST",
+      token,
+    }),
+  rejectVoter: (token, userId) =>
+    request(`/api/auth/users/${userId}/reject-voter`, {
+      method: "DELETE",
+      token,
+    }),
   deleteUser: (token, userId) =>
     request(`/api/auth/users/${userId}`, { method: "DELETE", token }),
   getElections: (token) => request("/api/elections", { token }),
@@ -60,10 +71,13 @@ export const api = {
     request(`/api/candidates/election/${electionId}`, { token }),
   addCandidate: (token, body) =>
     request("/api/candidates", { method: "POST", token, body }),
+  updateCandidate: (token, candidateId, body) =>
+    request(`/api/candidates/${candidateId}`, { method: "PUT", token, body }),
   removeCandidate: (token, candidateId) =>
     request(`/api/candidates/${candidateId}`, { method: "DELETE", token }),
   castVote: (token, body) =>
     request("/api/votes", { method: "POST", token, body }),
   getResults: (token, electionId) =>
     request(`/api/votes/results/${electionId}`, { token }),
+  getParticipation: (token) => request("/api/votes/participation", { token }),
 };

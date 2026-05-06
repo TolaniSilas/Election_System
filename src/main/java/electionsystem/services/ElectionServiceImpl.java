@@ -1,6 +1,7 @@
 package electionsystem.services;
 
 import electionsystem.data.models.Election;
+import electionsystem.data.models.ElectionScope;
 import electionsystem.data.models.ElectionStatus;
 import electionsystem.data.models.Role;
 import electionsystem.data.models.User;
@@ -9,12 +10,12 @@ import electionsystem.data.repositories.ElectionRepository;
 import electionsystem.data.repositories.VoteRepository;
 import electionsystem.dtos.requests.ElectionRequest;
 import electionsystem.exceptions.AuthorizationException;
-import electionsystem.exceptions.InvalidStateException;
 import electionsystem.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ElectionServiceImpl implements ElectionService {
@@ -41,6 +42,9 @@ public class ElectionServiceImpl implements ElectionService {
         election.setDescription(request.getDescription().trim());
         election.setStartTime(request.getStartTime());
         election.setEndTime(request.getEndTime());
+        election.setCategory(request.getCategory());
+        election.setScope(request.getScope());
+        election.setState(normalizeState(request.getScope(), request.getState()));
         election.setStatus(resolveStatus(request.getStartTime(), request.getEndTime()));
         election.setCreatedByUserId(currentUser.getId());
         election.setCreatedAt(LocalDateTime.now());
@@ -53,17 +57,14 @@ public class ElectionServiceImpl implements ElectionService {
         assertAdmin(currentUser);
         validateSchedule(request);
         Election election = getManagedElection(electionId);
-        if (election.getStatus() == ElectionStatus.ENDED) {
-            throw new InvalidStateException("Ended elections cannot be modified");
-        }
-        if (voteRepository.existsByElectionId(electionId)) {
-            throw new InvalidStateException("Elections with recorded votes cannot be modified");
-        }
 
         election.setTitle(request.getTitle().trim());
         election.setDescription(request.getDescription().trim());
         election.setStartTime(request.getStartTime());
         election.setEndTime(request.getEndTime());
+        election.setCategory(request.getCategory());
+        election.setScope(request.getScope());
+        election.setState(normalizeState(request.getScope(), request.getState()));
         election.setStatus(resolveStatus(request.getStartTime(), request.getEndTime()));
         election.setUpdatedAt(LocalDateTime.now());
         return electionRepository.save(election);
@@ -73,26 +74,28 @@ public class ElectionServiceImpl implements ElectionService {
     public void deleteElection(User currentUser, String electionId) {
         assertAdmin(currentUser);
         Election election = getManagedElection(electionId);
-        if (election.getStatus() != ElectionStatus.UPCOMING) {
-            throw new InvalidStateException("Only upcoming elections can be deleted");
-        }
-        if (voteRepository.existsByElectionId(electionId)) {
-            throw new InvalidStateException("Elections with votes cannot be deleted");
-        }
 
+        voteRepository.deleteByElectionId(electionId);
         candidateRepository.deleteByElectionId(electionId);
         electionRepository.delete(election);
     }
 
     @Override
-    public List<Election> getAllElections() {
-        return electionRepository.findAll().stream().map(this::refreshStatus).toList();
+    public List<Election> getAllElections(User currentUser) {
+        return electionRepository.findAll().stream()
+                .map(this::refreshStatus)
+                .filter(election -> isVisibleToUser(election, currentUser))
+                .toList();
     }
 
     @Override
-    public Election getElectionById(String electionId) {
-        return refreshStatus(electionRepository.findById(electionId)
+    public Election getElectionById(String electionId, User currentUser) {
+        Election election = refreshStatus(electionRepository.findById(electionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Election not found")));
+        if (!isVisibleToUser(election, currentUser)) {
+            throw new AuthorizationException("You are not eligible to access this election");
+        }
+        return election;
     }
 
     private void assertAdmin(User currentUser) {
@@ -104,6 +107,14 @@ public class ElectionServiceImpl implements ElectionService {
     private void validateSchedule(ElectionRequest request) {
         if (!request.getStartTime().isBefore(request.getEndTime())) {
             throw new InvalidStateException("Start time must be before end time");
+        }
+        if (request.getScope() == ElectionScope.STATE &&
+                (request.getState() == null || request.getState().trim().isEmpty())) {
+            throw new InvalidStateException("State elections require a state");
+        }
+        if (request.getScope() == ElectionScope.NATIONAL &&
+                request.getState() != null && !request.getState().trim().isEmpty()) {
+            throw new InvalidStateException("National elections cannot include a state");
         }
     }
 
@@ -131,5 +142,23 @@ public class ElectionServiceImpl implements ElectionService {
             return ElectionStatus.ENDED;
         }
         return ElectionStatus.ONGOING;
+    }
+
+    private boolean isVisibleToUser(Election election, User currentUser) {
+        if (currentUser.getRole() == Role.ADMIN || currentUser.getRole() == Role.SUPER_ADMIN) {
+            return true;
+        }
+        if (election.getScope() == null || election.getScope() == ElectionScope.NATIONAL) {
+            return true;
+        }
+        return election.getState() != null &&
+                election.getState().equalsIgnoreCase(currentUser.getStateOfOrigin());
+    }
+
+    private String normalizeState(ElectionScope scope, String state) {
+        if (scope == ElectionScope.NATIONAL) {
+            return null;
+        }
+        return state.trim().toUpperCase(Locale.ROOT);
     }
 }

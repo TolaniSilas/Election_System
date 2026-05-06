@@ -4,6 +4,7 @@ import electionsystem.data.models.ApprovalStatus;
 import electionsystem.data.models.AuthSession;
 import electionsystem.data.models.Role;
 import electionsystem.data.models.User;
+import electionsystem.data.models.VoterApprovalStatus;
 import electionsystem.data.repositories.AuthSessionRepository;
 import electionsystem.data.repositories.UserRepository;
 import electionsystem.dtos.requests.LoginRequest;
@@ -42,26 +43,33 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail().trim().toLowerCase())) {
             throw new DuplicateUserException("Email already exists");
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername().trim())) {
             throw new DuplicateUserException("Username already exists");
+        }
+        if (userRepository.existsByNin(request.getNin().trim())) {
+            throw new DuplicateUserException("NIN already exists");
         }
 
         Role role = Role.valueOf(request.getRole().toUpperCase());
         User user = new User();
         user.setUsername(request.getUsername().trim());
         user.setEmail(request.getEmail().trim().toLowerCase());
+        user.setNin(request.getNin().trim());
+        user.setStateOfOrigin(request.getStateOfOrigin().trim().toUpperCase());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
         user.setActive(true);
         user.setCreatedAt(LocalDateTime.now());
         if (role == Role.ADMIN) {
             user.setApprovalStatus(ApprovalStatus.PENDING);
+            user.setVoterApprovalStatus(VoterApprovalStatus.PENDING);
         } else {
             user.setApprovalStatus(ApprovalStatus.APPROVED);
             user.setApprovedAt(LocalDateTime.now());
+            user.setVoterApprovalStatus(VoterApprovalStatus.PENDING);
         }
 
         try {
@@ -109,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public List<UserResponse> getAllUsers(User currentUser) {
-        requireSuperAdmin(currentUser);
+        requireAdminOrSuperAdmin(currentUser);
         return userRepository.findAll().stream().map(UserResponse::from).toList();
     }
 
@@ -127,6 +135,35 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public UserResponse approveVoter(String userId, User currentUser) {
+        requireAdminOrSuperAdmin(currentUser);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (user.getRole() != Role.VOTER) {
+            throw new InvalidStateException("Only voter accounts can be approved to vote");
+        }
+        if (user.getApprovalStatus() != ApprovalStatus.APPROVED) {
+            user.setApprovalStatus(ApprovalStatus.APPROVED);
+            user.setApprovedAt(LocalDateTime.now());
+        }
+        user.setActive(true);
+        user.setVoterApprovalStatus(VoterApprovalStatus.APPROVED);
+        return UserResponse.from(userRepository.save(user));
+    }
+
+    @Override
+    public void rejectVoter(String userId, User currentUser) {
+        requireAdminOrSuperAdmin(currentUser);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (user.getRole() != Role.VOTER) {
+            throw new InvalidStateException("Only voter accounts can be rejected from voting");
+        }
+        authSessionRepository.deleteByUserId(user.getId());
+        userRepository.delete(user);
+    }
+
+    @Override
     public void deleteUser(String userId, User currentUser) {
         requireSuperAdmin(currentUser);
         User user = userRepository.findById(userId)
@@ -141,6 +178,12 @@ public class AuthServiceImpl implements AuthService {
     private void requireSuperAdmin(User currentUser) {
         if (currentUser.getRole() != Role.SUPER_ADMIN) {
             throw new AuthorizationException("Only the super admin can perform this action");
+        }
+    }
+
+    private void requireAdminOrSuperAdmin(User currentUser) {
+        if (currentUser.getRole() != Role.ADMIN && currentUser.getRole() != Role.SUPER_ADMIN) {
+            throw new AuthorizationException("Only admin users can perform this action");
         }
     }
 }

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/candidates")
@@ -20,10 +21,21 @@ public class CandidateController {
         this.candidateService = candidateService;
     }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse> add(@CurrentUser User currentUser, @Valid @RequestBody CandidateRequest request) {
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse> add(@CurrentUser User currentUser,
+                                           @Valid @ModelAttribute CandidateRequest request,
+                                           @RequestParam("image") MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse(true, "Candidate added", candidateService.addCandidate(currentUser, request)));
+                .body(new ApiResponse(true, "Candidate added", candidateService.addCandidate(currentUser, request, image)));
+    }
+
+    @PutMapping(value = "/{candidateId}", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse> update(@CurrentUser User currentUser,
+                                              @PathVariable String candidateId,
+                                              @Valid @ModelAttribute CandidateRequest request,
+                                              @RequestParam(value = "image", required = false) MultipartFile image) {
+        return ResponseEntity.ok(new ApiResponse(true, "Candidate updated",
+                candidateService.updateCandidate(currentUser, candidateId, request, image)));
     }
 
     @DeleteMapping("/{candidateId}")

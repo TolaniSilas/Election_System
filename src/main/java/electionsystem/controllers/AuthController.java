@@ -55,6 +55,17 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse(true, "Admin approved", authService.approveAdmin(userId, currentUser)));
     }
 
+    @PostMapping("/users/{userId}/approve-voter")
+    public ResponseEntity<ApiResponse> approveVoter(@PathVariable String userId, @CurrentUser User currentUser) {
+        return ResponseEntity.ok(new ApiResponse(true, "Voter approved", authService.approveVoter(userId, currentUser)));
+    }
+
+    @DeleteMapping("/users/{userId}/reject-voter")
+    public ResponseEntity<ApiResponse> rejectVoter(@PathVariable String userId, @CurrentUser User currentUser) {
+        authService.rejectVoter(userId, currentUser);
+        return ResponseEntity.ok(new ApiResponse(true, "Voter rejected and removed", null));
+    }
+
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable String userId, @CurrentUser User currentUser) {
         authService.deleteUser(userId, currentUser);

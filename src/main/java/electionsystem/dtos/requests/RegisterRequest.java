@@ -22,6 +22,13 @@ public class RegisterRequest {
     @Pattern(regexp = "ADMIN|VOTER", message = "Role must be ADMIN or VOTER")
     private String role;
 
+    @NotBlank(message = "NIN is required")
+    @Pattern(regexp = "\\d{11}", message = "NIN must be exactly 11 digits")
+    private String nin;
+
+    @NotBlank(message = "State of origin is required")
+    private String stateOfOrigin;
+
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
     public String getEmail() { return email; }
@@ -30,4 +37,8 @@ public class RegisterRequest {
     public void setPassword(String password) { this.password = password; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public String getNin() { return nin; }
+    public void setNin(String nin) { this.nin = nin; }
+    public String getStateOfOrigin() { return stateOfOrigin; }
+    public void setStateOfOrigin(String stateOfOrigin) { this.stateOfOrigin = stateOfOrigin; }
 }

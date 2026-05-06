@@ -8,7 +8,6 @@ import electionsystem.data.repositories.UserRepository;
 import electionsystem.exceptions.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
@@ -27,6 +26,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String path = request.getRequestURI();
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
         if (isPublicPath(path)) {
             return true;
         }
